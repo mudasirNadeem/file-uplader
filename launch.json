@@ -1,0 +1,13 @@
+    {
+      "version": "0.2.0",
+      "configurations": [
+        {
+          "type": "lldb",
+          "request": "launch",
+          "name": "Debug Tauri App",
+          "program": "${workspaceFolder}/src-tauri/target/debug/your-app-name", // Replace with your actual executable path
+          "args": [],
+          "cwd": "${workspaceFolder}"
+        }
+      ]
+    }
