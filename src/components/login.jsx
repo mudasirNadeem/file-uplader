@@ -2,8 +2,8 @@ import { useState } from "react";
 import { loginUser } from "../service/dbService";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("mudasirnadeem7979@gmail.com");
+  const [password, setPassword] = useState("mudasir2525");
   const [error, setError] = useState("");
   const [isLoading, setLoading] = useState(false);
   async function handleSubmit(e) {
@@ -22,9 +22,9 @@ export default function LoginPage() {
     setLoading(false);
   }
   return (
-    <div className="min-h-screen bg-base-100 flex items-center justify-center px-4 relative">
+    <div className="min-h-screen  flex items-center justify-center px-4 relative">
       <div
-        className={`card w-full max-w-sm shadow-2xl bg-base-200 transition-opacity duration-300`}
+        className={`card w-full max-w-sm shadow-md transition-opacity duration-300`}
       >
         <div className="card-body">
           <h2 className="text-2xl font-bold text-center mb-4 text-base-content">
@@ -39,6 +39,7 @@ export default function LoginPage() {
               <input
                 type="email"
                 placeholder="email@example.com"
+                value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="input input-bordered"
                 name="email"
@@ -52,6 +53,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="password"
+                value={password}
                 name="password"
                 placeholder="••••••••"
                 onChange={(e) => setPassword(e.target.value)}

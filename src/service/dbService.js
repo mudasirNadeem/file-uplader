@@ -1,8 +1,8 @@
 import Database from "@tauri-apps/plugin-sql";
 import { Storage } from "megajs";
+import { readTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
 
 let db = null;
-let storage = null;
 export async function initDatabase() {
   if (!db) {
     try {
@@ -21,15 +21,25 @@ export async function initDatabase() {
   }
   return db;
 }
+
+export async function getMegaStorage() {
+  let storage = new Storage({
+    email: localStorage.getItem("email"),
+    password: localStorage.getItem("password"),
+  });
+  await storage.ready;
+  return await getFolder(storage);
+}
 export async function loginUser(email, password) {
   try {
-    storage = new Storage({
+    localStorage.setItem("email", email);
+    localStorage.setItem("password", password);
+    let storage = new Storage({
       email: email,
       password: password,
     });
     await storage.ready;
     if (storage) {
-      await createFolder(storage);
       return { ok: true };
     } else {
       return { ok: false };
@@ -40,26 +50,56 @@ export async function loginUser(email, password) {
   }
 }
 
-async function createFolder(storage) {
+async function getFolder(storage) {
   try {
     const folderName = "mega file upload";
-    await storage.ready;
     const existingFolder = await storage.find(folderName);
     if (!existingFolder) {
-      const newFolder = await storage.mkdir(folderName);
+      existingFolder = await storage.mkdir(folderName);
     }
+    return existingFolder;
   } catch (error) {
     console.error("❌ Error in createFolder:", error.message);
   }
 }
 
-export async function uploadFile(value) {
+export async function uploadFile(file) {
   try {
-     console.log("Storage status:", storage);
-    if (!storage) throw new Error("❌ Not logged in: storage is missing");
-    await storage.ready;
-    const file = await storage.upload(value, value).complete;
+    const megaFolder = await getMegaStorage();
+    const fileName = file.name;
+    const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    const existFile = megaFolder.children.find(
+      (child) => child.name === fileName
+    );
+    if (existFile) {
+      confirm("File already exists in MEGA. Skipping upload.");
+      return;
+    }
+    const uploadedFile = await megaFolder.upload(fileName, uint8Array).complete;
+    confirm("The file was uploaded!", uploadedFile);
   } catch (error) {
-    console.log("Mudasir");
+    alert(error.message);
+  }
+}
+
+export async function uploadFolder(folderName) {
+  try {
+    const email = localStorage.getItem("email");
+    const password = localStorage.getItem("password");
+    let storage = new Storage({ email, password });
+    await storage.ready;
+    const existingFolder = storage.root.children.find(
+      (child) => child.name === folderName && child.directory
+    );
+    if (existingFolder) {
+      return { ok: false };
+    } else {
+      await storage.mkdir(folderName);
+      return { ok: true };
+    }
+  } catch (error) {
+    console.log(error.message);
+    return { ok: false, error: error.message };
   }
 }
