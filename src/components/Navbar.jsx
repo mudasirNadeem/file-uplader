@@ -12,6 +12,9 @@ const Navbar = () => {
     const result = await uploadFile(file);
     setLoading(false);
   }
+  function deleteLogcalStorage(){
+          localStorage.clear();
+  }
   return (
     <>
       {isLoading && (
@@ -46,7 +49,7 @@ const Navbar = () => {
           >
             <FolderPlus size={20} />
           </button>
-          <a href="/" className="btn btn-primary flex items-center gap-2">
+          <a onClick={() => deleteLogcalStorage()} href="/" className="btn btn-primary flex items-center gap-2">
             <LogOut size={20} />
           </a>
         </div>

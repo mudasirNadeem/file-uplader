@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { loginUser } from "../service/dbService";
 
 export default function LoginPage() {
@@ -6,12 +6,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState("mudasir2525");
   const [error, setError] = useState("");
   const [isLoading, setLoading] = useState(false);
+  useEffect(() => {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    if (isLoggedIn === "true") {
+      window.location.href = "/product";
+    }
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     try {
       setLoading(true);
       const result = await loginUser(email, password);
       if (result.ok) {
+        localStorage.setItem("isLoggedIn", "true");
         window.location.href = "/product";
       } else {
         setError("Your password or email is wrong");
@@ -82,9 +90,8 @@ export default function LoginPage() {
               <button
                 type="submit"
                 className={`btn btn-primary `}
-               disabled={isLoading}
+                disabled={isLoading}
               >
-                
                 {isLoading && (
                   <span className="loading loading-spinner loading-3xl text-primary "></span>
                 )}
