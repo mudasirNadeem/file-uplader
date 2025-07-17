@@ -1,7 +1,7 @@
 import Database from "@tauri-apps/plugin-sql";
 import { Storage } from "megajs";
-import { readTextFile, BaseDirectory } from "@tauri-apps/plugin-fs";
-
+import { appDataDir } from '@tauri-apps/api/path';
+import * as fs from "@tauri-apps/plugin-fs";
 let db = null;
 export async function initDatabase() {
   if (!db) {
@@ -96,6 +96,7 @@ export async function uploadFolder(folderName) {
       return { ok: false };
     } else {
       await storage.mkdir(folderName);
+      createAppDataFolder(folderName);
       return { ok: true };
     }
   } catch (error) {
@@ -103,3 +104,22 @@ export async function uploadFolder(folderName) {
     return { ok: false, error: error.message };
   }
 }
+
+
+
+async function createAppDataFolder(folderName) {
+  try {
+    const appDataDirPath = await appDataDir();
+    const folderPath = `${appDataDirPath}/${folderName}`;
+
+    await fs.mkdir(folderPath, {
+      dir: fs.BaseDirectory.AppData,
+      recursive: true
+    });
+
+    console.log(`Folder '${folderName}' created successfully at ${folderPath}`);
+  } catch (error) {
+    console.error('Error creating folder:', error);
+  }
+}
+

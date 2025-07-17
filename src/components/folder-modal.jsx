@@ -5,16 +5,23 @@ import { X } from "lucide-react";
 export default function FolderModal({ open, onClose }) {
   const [folderName, setFolderName] = useState();
   const [isLoading, setLoading] = useState(false);
+
   async function handleSubmit() {
     setLoading(true);
-    const result = await uploadFolder(folderName);
-    if (result.ok) {
-      confirm("Your folder was Created");
-      onClose();
+    if (folderName == undefined || folderName.length < 3) {
+      alert("Folder name must be at least 3 characters long.");
+      setLoading(false);
+      return;
     } else {
-      confirm("This folder already exists. Please enter a different name");
+      const result = await uploadFolder(folderName);
+      if (result.ok) {
+        setLoading(false);
+        alert("Your folder was Created");
+        onClose();
+      } else {
+        confirm("This folder already exists. Please enter a different name");
+      }
     }
-    setLoading(false);
   }
   if (!open) return null;
   return (
@@ -45,6 +52,7 @@ export default function FolderModal({ open, onClose }) {
               </label>
               <input
                 type="text"
+                required
                 onInput={(e) => setFolderName(e.target.value)}
                 placeholder="Enter folder name"
                 className="input input-bordered w-full"
