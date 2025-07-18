@@ -20,6 +20,7 @@ export default function FolderModal({ open, onClose }) {
         onClose();
       } else {
         confirm("This folder already exists. Please enter a different name");
+        setLoading(false);
       }
     }
   }
