@@ -6,21 +6,29 @@ import { FolderIcon } from "lucide-react";
 const ProductCard = () => {
   var [loadContant, setLoadContant] = useState();
   var [backButton, setBackButton] = useState();
-  async function loadFiles(id, back) {
-    var result = await loadAllFile(id);
+  var [parentId, setParentId] = useState();
+  var [defaultParentId, setDefaultParentId] = useState();
+  async function loadFiles(id,  defaultParentId , back) {
+    if(id !== undefined ){
+     setParentId(id)
+     var result = await loadAllFile(id);
+    }
+    else{
+     var result = await loadAllFile(defaultParentId);
+    }
     setBackButton(back);
     if (result.ok) {
       setLoadContant(result.data);
     }
   }
   useEffect(() => {
-    loadFiles(undefined, false);
+    loadFiles(undefined, defaultParentId, false);
   }, []);
   return (
     <>
-      <Navbar />
+      <Navbar parentId={parentId} />
           {backButton ? (
-          <button onClick={() => loadFiles(undefined , false)}>Back</button>
+          <button className="btn btn-primary" onClick={() => loadFiles(undefined , false)}>Back</button>
         ):(
            <span></span>
         )}
@@ -28,6 +36,7 @@ const ProductCard = () => {
     
         {loadContant?.map((item, index) => (
           <div key={index}>
+          {setDefaultParentId(item.parentId)}
             {item.type === "file" ? (
               <div className="mx-3">
                 <img src={item.localPath} width={120} height={100} alt="sdf" />
@@ -36,7 +45,7 @@ const ProductCard = () => {
             ) : (
               <div
                 className="flex items-center mx-3 cursor-pointer flex-col gap-2"
-                onClick={() => loadFiles(item.parentId, true)}
+                onClick={() => loadFiles(item.id, true)}
               >
                 <FolderIcon className="w-[90px] h-[91px] text-yellow-600" />
                 <span className="w-[100px]  break-words text-wrap">

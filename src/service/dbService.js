@@ -75,8 +75,7 @@ async function getFolder(storage) {
 }
 var fileName = "";
 
-var insertFile = "";
-export async function uploadFile(file) {
+export async function uploadFile(file , parentId) {
   try {
     const database = await initDatabase();
     const megaFolder = await getMegaStorage();
@@ -95,7 +94,22 @@ export async function uploadFile(file) {
     }
     const uploadedFile = await megaFolder.upload(fileName, uint8Array).complete;
     var type = "file";
-    insertFile = await database.execute(
+    if(parentId){
+        var insertFile = await database.execute(
+      "INSERT INTO files (id, email, password, type, localPath , parentId , name) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [
+        uploadedFile.nodeId,
+        email,
+        password,
+        type,
+        localPath,
+        parentId,
+        fileName,
+      ]
+    );
+    }
+    else{
+    var insertFile = await database.execute(
       "INSERT INTO files (id, email, password, type, localPath , parentId , name) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         uploadedFile.nodeId,
@@ -107,15 +121,17 @@ export async function uploadFile(file) {
         fileName,
       ]
     );
+     }
     copyFilesToAppData(file);
     confirm("The file was uploaded!", uploadedFile);
   } catch (error) {
     alert(error.message);
   }
 }
-export async function uploadFolder(folderName) {
+export async function uploadFolder(folderName , parentId)  {
   try {
     const database = await initDatabase();
+    const megaFolder = await getMegaStorage();
     const email = localStorage.getItem("email");
     const password = localStorage.getItem("password");
     let storage = new Storage({ email, password });
@@ -126,10 +142,11 @@ export async function uploadFolder(folderName) {
     if (existingFolder) {
       return { ok: false };
     } else {
-      var folderCreating = await storage.mkdir(folderName);
+      var folderCreating = await megaFolder.mkdir(folderName , parentId);
       var type = "folder";
       var localPath = `C:/Users/GAC/AppData/Roaming/com.file-upload.app/${folderName}`;
-      insertFile = await database.execute(
+      if(parentId){
+   var insertFile = await database.execute(
         "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
         [
           folderCreating.nodeId,
@@ -138,9 +155,24 @@ export async function uploadFolder(folderName) {
           type,
           localPath,
           folderName,
-          folderCreating.parent.nodeId
+          parentId,
         ]
       );
+      }
+      else{
+      var insertFile = await database.execute(
+        "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
+        [
+          folderCreating.nodeId,
+          email,
+          password,
+          type,
+          localPath,
+          folderName,
+          folderCreating.parent.nodeId,
+        ]
+      );
+    }
       createAppDataFolder(folderName);
       return { ok: true };
     }
@@ -178,22 +210,14 @@ export async function copyFilesToAppData(file) {
     console.error("Error copying file:", error);
   }
 }
-let rows ;
 export async function loadAllFile(id) {
+  let rows;
   const database = await initDatabase();
   const email = localStorage.getItem("email");
   const password = localStorage.getItem("password");
-  if(id == undefined){
-     rows = await database.select(
-      "SELECT * FROM files WHERE email = ? AND password = ?",
-      [email, password]
-    );
-  }
-  else{
-      rows = await database.select(
+    rows = await database.select(
       "SELECT * FROM files WHERE email = ? AND password = ? AND parentId = ?",
-      [email, password , id]
+      [email, password, id]
     );
-  }
   return { ok: true, data: rows };
 }

@@ -4,12 +4,12 @@ import { FolderPlus } from "lucide-react";
 import FolderModal from "./folder-modal";
 import { Upload } from "lucide-react";
 import { LogOut } from "lucide-react";
-const Navbar = () => {
+const Navbar = ({parentId}) => {
   const [folderModal, setFolderModal] = useState(false);
   const [isLoading, setLoading] = useState(false);
   async function getFile(file) {
     setLoading(true);
-    const result = await uploadFile(file);
+    const result = await uploadFile(file , parentId);
     setLoading(false);
   }
   function deleteLogcalStorage(){
@@ -53,7 +53,7 @@ const Navbar = () => {
             <LogOut size={20} />
           </a>
         </div>
-        <FolderModal open={folderModal} onClose={() => setFolderModal(false)} />
+        <FolderModal parentId={parentId} open={folderModal} onClose={() => setFolderModal(false)} />
       </nav>
     </>
   );
