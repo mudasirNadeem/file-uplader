@@ -8,35 +8,37 @@ const ProductCard = () => {
   var [backButton, setBackButton] = useState();
   var [parentId, setParentId] = useState();
   var [defaultParentId, setDefaultParentId] = useState();
-  async function loadFiles(id,  defaultParentId , back) {
-    if(id !== undefined ){
-     setParentId(id)
-     var result = await loadAllFile(id);
+  var [folderName, setFolderName] = useState();
+  async function loadFiles(id, back) {
+    if (id !== undefined) {
+      setParentId(id);
     }
-    else{
-     var result = await loadAllFile(defaultParentId);
-    }
+    var result = await loadAllFile(id);
     setBackButton(back);
     if (result.ok) {
       setLoadContant(result.data);
     }
   }
   useEffect(() => {
-    loadFiles(undefined, defaultParentId, false);
+    loadFiles(undefined, false);
   }, []);
   return (
     <>
-      <Navbar parentId={parentId} />
-          {backButton ? (
-          <button className="btn btn-primary" onClick={() => loadFiles(undefined , false)}>Back</button>
-        ):(
-           <span></span>
-        )}
+      <Navbar parentId={parentId} folderName={folderName}/>
+      {backButton ? (
+        <button
+          className="btn btn-primary"
+          onClick={() => loadFiles(undefined, false)}
+        >
+          Back
+        </button>
+      ) : (
+        <span></span>
+      )}
       <div className="flex p-4 flex-wrap">
-    
         {loadContant?.map((item, index) => (
           <div key={index}>
-          {setDefaultParentId(item.parentId)}
+            {/* {setDefaultParentId(item.parentId)} */}
             {item.type === "file" ? (
               <div className="mx-3">
                 <img src={item.localPath} width={120} height={100} alt="sdf" />
@@ -45,7 +47,10 @@ const ProductCard = () => {
             ) : (
               <div
                 className="flex items-center mx-3 cursor-pointer flex-col gap-2"
-                onClick={() => loadFiles(item.id, true)}
+                onClick={() => {
+                  setFolderName(item.name);
+                  loadFiles(item.id, true);
+                }}
               >
                 <FolderIcon className="w-[90px] h-[91px] text-yellow-600" />
                 <span className="w-[100px]  break-words text-wrap">

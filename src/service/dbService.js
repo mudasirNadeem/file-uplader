@@ -27,13 +27,13 @@ export async function initDatabase() {
   return db;
 }
 
-export async function getMegaStorage() {
+export async function getMegaStorage(fileName , folderName) {
   let storage = new Storage({
     email: localStorage.getItem("email"),
     password: localStorage.getItem("password"),
   });
   await storage.ready;
-  return await getFolder(storage);
+  return await getFolder(storage , folderName);
 }
 export async function loginUser(email, password) {
   try {
@@ -54,14 +54,13 @@ export async function loginUser(email, password) {
     return { ok: false };
   }
 }
-async function getFolder(storage) {
+async function getFolder(storage , foldername) {
   try {
-    const folderName = "mega file upload";
+    const folderName = foldername;
     const existingFolder = await storage.find(folderName);
     if (!existingFolder) {
       const appDataDirPath = await appDataDir();
       const folderPath = `${appDataDirPath}/${folderName}`;
-
       await fs.mkdir(folderPath, {
         dir: fs.BaseDirectory.AppData,
         recursive: true,
@@ -73,29 +72,20 @@ async function getFolder(storage) {
     console.error("❌ Error in createFolder:", error.message);
   }
 }
-var fileName = "";
-
-export async function uploadFile(file , parentId) {
+var fileName = ""
+export async function uploadFile(file, parentId, folderName = "mega file upload") {
   try {
     const database = await initDatabase();
-    const megaFolder = await getMegaStorage();
-    fileName = `${Date.now()}_${file.name}`;
+     fileName = `${Date.now()}_${file.name}`; 
+    const megaFolder = await getMegaStorage(fileName, folderName);
     const arrayBuffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
     const email = localStorage.getItem("email");
     const password = localStorage.getItem("password");
-    const uint8Array = new Uint8Array(arrayBuffer);
-    var localPath = `mega file upload/${fileName}`;
-    const existFile = megaFolder.children.find(
-      (child) => child.name === fileName
-    );
-    if (existFile) {
-      confirm("File already exists in MEGA. Skipping upload.");
-      return;
-    }
+    const localPath = `${folderName}/${fileName}`;
     const uploadedFile = await megaFolder.upload(fileName, uint8Array).complete;
-    var type = "file";
-    if(parentId){
-        var insertFile = await database.execute(
+    const type = "file";
+    const insertFile = await database.execute(
       "INSERT INTO files (id, email, password, type, localPath , parentId , name) VALUES (?, ?, ?, ?, ?, ?, ?)",
       [
         uploadedFile.nodeId,
@@ -103,32 +93,19 @@ export async function uploadFile(file , parentId) {
         password,
         type,
         localPath,
-        parentId,
+        parentId || uploadedFile.parent?.nodeId,
         fileName,
       ]
     );
-    }
-    else{
-    var insertFile = await database.execute(
-      "INSERT INTO files (id, email, password, type, localPath , parentId , name) VALUES (?, ?, ?, ?, ?, ?, ?)",
-      [
-        uploadedFile.nodeId,
-        email,
-        password,
-        type,
-        localPath,
-        uploadedFile.parent.nodeId,
-        fileName,
-      ]
-    );
-     }
+
     copyFilesToAppData(file);
     confirm("The file was uploaded!", uploadedFile);
   } catch (error) {
     alert(error.message);
   }
 }
-export async function uploadFolder(folderName , parentId)  {
+
+export async function uploadFolder(folderName, parentId) {
   try {
     const database = await initDatabase();
     const megaFolder = await getMegaStorage();
@@ -142,37 +119,36 @@ export async function uploadFolder(folderName , parentId)  {
     if (existingFolder) {
       return { ok: false };
     } else {
-      var folderCreating = await megaFolder.mkdir(folderName , parentId);
+      var folderCreating = await megaFolder.mkdir(folderName, parentId);
       var type = "folder";
       var localPath = `C:/Users/GAC/AppData/Roaming/com.file-upload.app/${folderName}`;
-      if(parentId){
-   var insertFile = await database.execute(
-        "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
-        [
-          folderCreating.nodeId,
-          email,
-          password,
-          type,
-          localPath,
-          folderName,
-          parentId,
-        ]
-      );
+      if (parentId) {
+        var insertFile = await database.execute(
+          "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
+          [
+            folderCreating.nodeId,
+            email,
+            password,
+            type,
+            localPath,
+            folderName,
+            parentId,
+          ]
+        );
+      } else {
+        var insertFile = await database.execute(
+          "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
+          [
+            folderCreating.nodeId,
+            email,
+            password,
+            type,
+            localPath,
+            folderName,
+            folderCreating.parent.nodeId,
+          ]
+        );
       }
-      else{
-      var insertFile = await database.execute(
-        "INSERT INTO files (id, email, password, type,  localPath , name , parentId) VALUES (?,?, ?, ?, ?, ?, ?)",
-        [
-          folderCreating.nodeId,
-          email,
-          password,
-          type,
-          localPath,
-          folderName,
-          folderCreating.parent.nodeId,
-        ]
-      );
-    }
       createAppDataFolder(folderName);
       return { ok: true };
     }
@@ -211,13 +187,20 @@ export async function copyFilesToAppData(file) {
   }
 }
 export async function loadAllFile(id) {
-  let rows;
   const database = await initDatabase();
   const email = localStorage.getItem("email");
   const password = localStorage.getItem("password");
+  let rows;
+  if (id == undefined) {
+    rows = await database.select(
+      "SELECT * FROM files WHERE email = ? AND password = ?",
+      [email, password]
+    );
+  } else {
     rows = await database.select(
       "SELECT * FROM files WHERE email = ? AND password = ? AND parentId = ?",
       [email, password, id]
     );
+  }
   return { ok: true, data: rows };
 }
