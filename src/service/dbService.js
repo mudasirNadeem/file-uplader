@@ -54,7 +54,7 @@ export async function loginUser(email, password) {
     return { ok: false };
   }
 }
-async function getFolder(storage , foldername) {
+async function getFolder(storage , foldername = "mega upload files") {
   try {
     const folderName = foldername;
     const existingFolder = await storage.find(folderName);
@@ -73,7 +73,7 @@ async function getFolder(storage , foldername) {
   }
 }
 var fileName = ""
-export async function uploadFile(file, parentId, folderName = "mega file upload") {
+export async function uploadFile(file, parentId, folderName = "mega upload files") {
   try {
     const database = await initDatabase();
      fileName = `${Date.now()}_${file.name}`; 
@@ -149,7 +149,7 @@ export async function uploadFolder(folderName, parentId) {
           ]
         );
       }
-      createAppDataFolder(folderName);
+      createAppDataFolder(folderName , megaFolder);
       return { ok: true };
     }
   } catch (error) {
@@ -158,24 +158,22 @@ export async function uploadFolder(folderName, parentId) {
   }
 }
 
-async function createAppDataFolder(folderName) {
+async function createAppDataFolder(folderName, megaFolder) {
   try {
-    const appDataDirPath = await appDataDir();
-    const folderPath = `${appDataDirPath}/${folderName}`;
-
+        const appDataDirPath = await appDataDir();
+    const folderPath = `${appDataDirPath}/${megaFolder.name}/${folderName}`;
     await fs.mkdir(folderPath, {
       dir: fs.BaseDirectory.AppData,
       recursive: true,
     });
-
-    console.log(`Folder '${folderName}' created successfully at ${folderPath}`);
   } catch (error) {
     console.error("Error creating folder:", error);
   }
 }
+
 export async function copyFilesToAppData(file) {
   try {
-    const folderName = "mega file upload";
+    const folderName = "mega upload files";
     var filename = `${folderName}/${fileName}_${file.name}`;
     const arrayBuffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(arrayBuffer);
