@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { uploadFolder } from "../service/dbService";
 import { X } from "lucide-react";
 
-export default function FolderModal({ open, onClose , parentId }) {
+export default function FolderModal({ open, onClose , parentId , parentFolder }) {
   const [folderName, setFolderName] = useState();
   const [isLoading, setLoading] = useState(false);
 
@@ -13,7 +13,7 @@ export default function FolderModal({ open, onClose , parentId }) {
       setLoading(false);
       return;
     } else {
-      const result = await uploadFolder(folderName , parentId);
+      const result = await uploadFolder(folderName , parentId , parentFolder);
       if (result.ok) {
         setLoading(false);
         alert("Your folder was Created");

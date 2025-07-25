@@ -53,7 +53,7 @@ const Navbar = ({parentId , folderName}) => {
             <LogOut size={20} />
           </a>
         </div>
-        <FolderModal parentId={parentId} open={folderModal} onClose={() => setFolderModal(false)} />
+        <FolderModal parentId={parentId} parentFolder={folderName} open={folderModal} onClose={() => setFolderModal(false)} />
       </nav>
     </>
   );
