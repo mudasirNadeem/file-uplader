@@ -12,6 +12,17 @@ const ProductCard = () => {
   var [isLoading, setLoading] = useState(true);
   var [folderCache, setFolderCache] = useState(new Map());
 
+  async function refreshCurrentFolder() {
+    setLoading(true);
+    const result = await loadAllFile(parentId);
+    if (result.ok) {
+      const cacheKey = parentId || 'root';
+      setFolderCache(prev => new Map(prev).set(cacheKey, result.data));
+      setLoadContant(result.data);
+    }
+    setLoading(false);
+  }
+
   function goBack() {
     if (navigationStack.length > 0) {
       const previousState = navigationStack[navigationStack.length - 1];
@@ -56,13 +67,14 @@ const ProductCard = () => {
       setLoading(false);
     }
   }
+  
   useEffect(() => {
     loadFiles(undefined, false);
   }, []);
   
   return (
     <>
-      <Navbar parentId={parentId} folderName={folderName} />
+      <Navbar parentId={parentId} folderName={folderName} onFileAdded={refreshCurrentFolder} />
       {backButton ? (
         <button className="btn btn-primary" onClick={() => goBack()}>
           Back

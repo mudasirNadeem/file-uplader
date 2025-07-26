@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { uploadFolder } from "../service/dbService";
 import { X } from "lucide-react";
 
-export default function FolderModal({ open, onClose , parentId , parentFolder }) {
+export default function FolderModal({ open, onClose , parentId , onFileAdded, parentFolder }) {
   const [folderName, setFolderName] = useState();
   const [isLoading, setLoading] = useState(false);
   async function handleSubmit() {
@@ -17,6 +17,7 @@ export default function FolderModal({ open, onClose , parentId , parentFolder })
         setLoading(false);
         alert("Your folder was Created");
         onClose();
+        onFileAdded();
       } else {
         confirm("This folder already exists. Please enter a different name");
         setLoading(false);
