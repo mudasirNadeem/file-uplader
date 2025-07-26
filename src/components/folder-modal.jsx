@@ -5,7 +5,6 @@ import { X } from "lucide-react";
 export default function FolderModal({ open, onClose , parentId , parentFolder }) {
   const [folderName, setFolderName] = useState();
   const [isLoading, setLoading] = useState(false);
-
   async function handleSubmit() {
     setLoading(true);
     if (folderName == undefined || folderName.length < 3) {
@@ -28,9 +27,9 @@ export default function FolderModal({ open, onClose , parentId , parentFolder })
   return (
     <>
       {isLoading && (
-        <div className="fixed inset-0 z-[9999] bg-white/70 flex items-center justify-center">
-          <span className="loading loading-spinner loading-3xl text-primary"></span>
-        </div>
+          <div className="fixed inset-0   z-[9999] flex items-center justify-center bg-white/60">
+            <div className="w-12 h-12 border-4 border-[#422ad5]  border-t-transparent rounded-full animate-spin"></div>
+          </div>
       )}
       <div className="modal modal-open">
         <div className="modal-box relative">

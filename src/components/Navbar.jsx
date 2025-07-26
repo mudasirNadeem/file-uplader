@@ -4,13 +4,15 @@ import { FolderPlus } from "lucide-react";
 import FolderModal from "./folder-modal";
 import { Upload } from "lucide-react";
 import { LogOut } from "lucide-react";
-const Navbar = ({parentId , folderName}) => {
+const Navbar = ({parentId , loadFile, folderName}) => {
   const [folderModal, setFolderModal] = useState(false);
   const [isLoading, setLoading] = useState(false);
   async function getFile(file) {
     setLoading(true);
     const result = await uploadFile(file , parentId , folderName);
-    setLoading(false);
+    if(result.ok){
+      setLoading(false);
+    }
   }
   function deleteLogcalStorage(){
           localStorage.clear();
@@ -21,7 +23,7 @@ const Navbar = ({parentId , folderName}) => {
         <div className="fixed inset-0 z-50 pointer-events-auto">
           <div className="w-full h-full absolute top-0 left-0 bg-transparent pointer-events-auto" />
           <div className="flex items-center justify-center w-full h-full">
-            <span className="loading loading-spinner loading-3xl text-primary"></span>
+            <div className="w-12 h-12 border-4 border-[#422ad5] border-t-transparent rounded-full animate-spin"></div>
           </div>
         </div>
       )}
