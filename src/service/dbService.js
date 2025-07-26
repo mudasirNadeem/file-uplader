@@ -45,6 +45,7 @@ export async function loginUser(email, password) {
     });
     await storage.ready;
     if (storage) {
+      getFolder(storage)
       return { ok: true };
     } else {
       return { ok: false };
