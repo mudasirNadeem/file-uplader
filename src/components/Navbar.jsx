@@ -1,13 +1,15 @@
 import React, { useState } from "react";
-import { uploadFile } from "../service/dbService";
+import { uploadFile, syncWithMega } from "../service/dbService";
 import { FolderPlus } from "lucide-react";
 import FolderModal from "./folder-modal";
 import { Upload } from "lucide-react";
 import { LogOut } from "lucide-react";
+import { RefreshCcw } from "lucide-react";
 
 const Navbar = ({parentId , onFileAdded, folderName}) => {
   const [folderModal, setFolderModal] = useState(false);
   const [isLoading, setLoading] = useState(false);
+  const [isSyncing, setSyncing] = useState(false);
   
   async function getFile(file) {
     setLoading(true);
@@ -18,6 +20,20 @@ const Navbar = ({parentId , onFileAdded, folderName}) => {
       }
       setLoading(false);
     }
+  }
+  
+  async function handleSync() {
+    setSyncing(true);
+    const result = await syncWithMega();
+    if(result.ok){
+      if(onFileAdded) {
+        onFileAdded();
+      }
+      alert(result.message);
+    } else {
+      alert('Sync failed: ' + result.error);
+    }
+    setSyncing(false);
   }
   
   function deleteLogcalStorage(){
@@ -35,10 +51,19 @@ const Navbar = ({parentId , onFileAdded, folderName}) => {
         </div>
       )}
       <nav className="navbar px-4 py-2 flex justify-between items-center shadow">
+
+       
         <div className="flex items-center">
           <p className="text-3xl">Upload File</p>
         </div>
         <div className="flex">
+            <button
+            className="btn btn-neutral me-2"
+            onClick={handleSync}
+            disabled={isSyncing}
+          >
+            <RefreshCcw className={`w-6 h-6 cursor-pointer ${isSyncing ? 'animate-spin' : ''}`} />
+          </button>
           <input
             type="file"
             id="upload-Image"

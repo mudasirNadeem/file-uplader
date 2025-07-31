@@ -38,6 +38,9 @@
     "fs:allow-write-file",
     "fs:allow-write-text-file",
     "fs:allow-mkdir",
+    "fs:allow-remove",
+    "fs:allow-rename",
+    "fs:allow-truncate",
     {
       "identifier": "fs:scope",
       "allow": [
@@ -64,6 +67,9 @@
         },
         {
           "path": "$AUDIO/**"
+        },
+        {
+          "path": "$APPDATA/mega upload files/**"
         }
       ]
     }

@@ -55,9 +55,9 @@ export default function FolderModal({ open, onClose , parentId , onFileAdded, pa
                 type="text"
                 required
                 onInput={(e) => setFolderName(e.target.value)}
+                autoFocus
                 placeholder="Enter folder name"
                 className="input input-bordered w-full"
-                autoFocus
               />
             </div>
 

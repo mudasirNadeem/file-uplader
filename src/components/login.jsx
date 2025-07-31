@@ -9,7 +9,7 @@ export default function LoginPage() {
   useEffect(() => {
     const isLoggedIn = localStorage.getItem("isLoggedIn");
     if (isLoggedIn === "true") {
-      window.location.href = "/product";
+      window.location.href = "/fileUpload";
     }
   }, []);
 
@@ -20,7 +20,7 @@ export default function LoginPage() {
       const result = await loginUser(email, password);
       if (result.ok) {
         localStorage.setItem("isLoggedIn", "true");
-        window.location.href = "/product";
+        window.location.href = "/fileUpload";
       } else {
         setError("Your password or email is wrong");
       }
