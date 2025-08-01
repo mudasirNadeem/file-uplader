@@ -650,13 +650,12 @@ async function deleteFileLocally(filePath, id) {
     const fileExists = await fs.exists(filePath, { baseDir: BaseDirectory.AppData });
     if (fileExists) {
       await remove(filePath, { baseDir: BaseDirectory.AppData, recursive: true });
-      await syncWithMega();
     } 
   } catch (error) {
     console.error("Error deleting locally:", error.message);
   }
 }
 
-export async function showImage(imageId) {
-  console.log(imageId);
-}
+// export async function showImage(imageId) {
+//   console.log(imageId);
+// }
